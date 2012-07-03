@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 36
+/!svn/ver/191/projects/torque/torque
+END
+printlocalsetup.py
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/!svn/ver/191/projects/torque/torque/printlocalsetup.py
+END
+README.rst
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/!svn/ver/184/projects/torque/torque/README.rst
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/!svn/ver/183/projects/torque/torque/__init__.py
+END
+torque.py
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/!svn/ver/183/projects/torque/torque/torque.py
+END
