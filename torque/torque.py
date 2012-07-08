@@ -333,32 +333,37 @@ class PBS(list):
         # lines that start a tag = value match this regexp
         linere = re.compile('^    [a-zA-Z]')
         # continued lines have more spaces in them
-        linecont = re.compile('^        ')
+        linecont = re.compile('^\t')
         jobidre = re.compile('^Job Id:')
 
         for line in output:
+            # empty line indicates new job description
             if line == '':
                 self.append(job)
 
             # now get detailed information for each job
-            if jobidre.search(line):
+            elif jobidre.search(line):
                 job = {}
                 tag,value = line.split(':')
                 job[tag.strip()]= value.strip()
 
-            if linere.search(line):
-                #we have matched that the line starts a tag = value
+            elif linere.search(line):
+                # we have matched that the line starts a tag = value
                 # split the line with ' = ' to distinguish it from '='
                 # which also occurs frequently in the values
                 tag,value = line.split(' = ')
                 tag=tag.strip()
                 value=value.strip()
                 job[tag] = value
+
             elif linecont.search(line):
                 #a couple of tags have multiline values
                 # they don't match the regexp above, so i
                 # just add these lines to the tag
                 job[tag] += line.strip()
+
+            else:
+                print 'no match',line
 
     def threadpoll(self):
 
