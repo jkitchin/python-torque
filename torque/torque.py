@@ -12,94 +12,110 @@ from htp.ssh import ssh
 from htp.rsync import *
 from threading import Thread
 
+
 class JobSubmitted(exceptions.Exception):
-    def __init__(self,args=None):
+    def __init__(self, args=None):
         self.args = args
+
     def __str__(self):
         return string.join(self.args,'')
+
 
 class JobInQueue(exceptions.Exception):
-    def __init__(self,args=None):
+    def __init__(self, args=None):
         self.args = args
     def __str__(self):
         return string.join(self.args,'')
+
 
 class JobRunning(exceptions.Exception):
-    def __init__(self,args=None):
+    def __init__(self, args=None):
         self.args = args
+
     def __str__(self):
         return string.join(self.args,'')
+
 
 class JobHold(exceptions.Exception):
-    def __init__(self,args=None):
+    def __init__(self, args=None):
         self.args = args
+
     def __str__(self):
         return string.join(self.args,'')
+
 
 class JobErrorStatus(exceptions.Exception):
-    def __init__(self,args=None):
+    def __init__(self, args=None):
         self.args = args
     def __str__(self):
         return string.join(self.args,'')
+
 
 class UnknownJobStatus(exceptions.Exception):
-    def __init__(self,args=None):
+    def __init__(self, args=None):
         self.args = args
     def __str__(self):
         return string.join(self.args,'')
+
 
 class JobDone(exceptions.Exception):
-    def __init__(self,args=None):
+    def __init__(self, args=None):
         self.args = args
     def __str__(self):
         return string.join(self.args,'')
 
+
 class PBS_MemoryExceeded(exceptions.Exception):
-    def __init__(self,args=None):
+    def __init__(self, args=None):
         self.args = args
         mem = r'(\d+)kb'
 
         reg = re.compile(mem)
-        print 'ARGS: =',self.args
-        usedmem,requestedmem = reg.findall(str(self.args))
+        print 'ARGS: =', self.args
+        usedmem, requestedmem = reg.findall(str(self.args))
         print 'PBS_MEM_ERR: Resubmit the job with at least %skb of memory' % usedmem
 
         self.mem = int(usedmem)
 
         print 'PBS_MEM_ERR:', string.join(self.args)
 
+
 class PBS_CputExceeded(exceptions.Exception):
-    def __init__(self,args=None):
+    def __init__(self, args=None):
         self.args = args
         cput = r'(\d+)'
 
         reg = re.compile(cput)
-        cputused,cputlimit = reg.findall(str(args))
+        cputused, cputlimit = reg.findall(str(args))
         print 'PBS_CPUT_ERR: Ran out of time.'
 
         self.cput = int(cputlimit)
 
         print 'PBS_CPUT_ERR:', string.join(self.args)
 
+
 class PBS_Terminated(exceptions.Exception):
-    def __init__(self,args=None):
+    def __init__(self, args=None):
         self.args = args
+
 
 class PBS_UnknownError(exceptions.Exception):
-    def __init__(self,args=None):
+    def __init__(self, args=None):
         self.args = args
+
 
 class LAMMPI_Error(exceptions.Exception):
-    def __init__(self,args=None):
+    def __init__(self, args=None):
         self.args = args
+
 
 class FORTRAN_Error(exceptions.Exception):
-    def __init__(self,args=None):
+    def __init__(self, args=None):
         self.args = args
 
+
 class PBS(list):
-    '''
-    This is a module to interact with the Torque queue system to
+    """This is a module to interact with the Torque queue system to
     find jobs and manipulate them.
 
     Usage for pbs running on local machine:
@@ -108,27 +124,22 @@ class PBS(list):
     Usage for pbs running on remote machine as a user:
     torque = Torque('jkitchin@beowulf.cheme.cmu.edu')
 
-    '''
-    def __init__(self,
-                 host=None):
+    """
+    def __init__(self, host=None):
         list.__init__(self)
 
         self.host = host
-        #if host == None:
-        #    self.host = 'gilgamesh.cheme.cmu.edu'
-        #else:
-        #    self.host = host
 
-        #use an env var to set verbosity level of outputting information
-        self.verbosity = int(os.environ.get('PBS_VERBOSITY',0))
+        # use an env var to set verbosity level of outputting information
+        self.verbosity = int(os.environ.get('PBS_VERBOSITY', 0))
 
-        #default options for qsub
-        self.qsub_mem = 750*1024 #in kb
-        self.qsub_cput = (7*24,0,0) #(hours,minutes,seconds)
+        # default options for qsub
+        self.qsub_mem = 750 * 1024  # in kb
+        self.qsub_cput = (7 * 24, 0, 0)  # (hours,minutes,seconds)
         self.qsub_opts = '-j oe'
 
-        #make sure pbs responds a little
-        status,output = self.getstatusoutput('qstat -B')
+        # make sure pbs responds a little
+        status, output = self.getstatusoutput('qstat -B')
         if status == 0:
             output = output.split('\n')
             fields = output[2].split()
@@ -143,26 +154,25 @@ class PBS(list):
             s += str(job) + '\n'
         return s
 
-    def getstatusoutput(self,cmd):
+    def getstatusoutput(self, cmd):
         ''' run command either locally or remotely and get output and status '''
         if self.host is None:
             status,output = commands.getstatusoutput(cmd)
         else:
             status,output = ssh(cmd,self.host)
 
-        return status,output
+        return status, output
 
-    def qmgr(self,*cmds):
+    def qmgr(self, *cmds):
         'run commands through qmgr via python'
         for cmd in cmds:
-            status,output = self.getstatusoutput('qmgr -c "%s"' % cmd)
+            status, output = self.getstatusoutput('qmgr -c "%s"' % cmd)
             if status is not None:
                 print output
 
-    def qmove(self,destination,*jobids):
-
+    def qmove(self, destination, *jobids):
         for jobid in jobids:
-            status,output = self.getstatusoutput('qmove %s %s' % (destination,jobid))
+            status, output = self.getstatusoutput('qmove %s %s' % (destination,jobid))
             if status is not None:
                 print output
 
@@ -180,7 +190,7 @@ class PBS(list):
         return status,output
 
 
-    def qdisable(self,*queue):
+    def qdisable(self, *queue):
         '''
         disable queues on beowulf
         '''
@@ -189,12 +199,12 @@ class PBS(list):
             queue = ['@%s' % self.server]
 
         print queue
-        cmd = 'qdisable %s' % string.join(queue,' ')
+        cmd = 'qdisable %s' % string.join(queue, ' ')
         status,output = self.getstatusoutput(cmd)
         return status,output
 
 
-    def qsuspend(self,*queue):
+    def qsuspend(self, *queue):
         '''
         suspend queues on beowulf
 
@@ -205,19 +215,19 @@ class PBS(list):
 
         print queue
         cmd = 'qstop %s' % string.join(queue,' ')
-        status,output = self.getstatusoutput(cmd)
+        status, output = self.getstatusoutput(cmd)
         return status,output
 
-    def qstart(self,*queue):
+    def qstart(self, *queue):
         ''' set queues to running state
         '''
 
         if len(queue) == 0:
             queue = ['@%s' % self.server]
 
-        cmd = 'qstart %s' % string.join(queue,' ')
-        status,output = self.getstatusoutput(cmd)
-        return (status,output)
+        cmd = 'qstart %s' % string.join(queue, ' ')
+        status, output = self.getstatusoutput(cmd)
+        return (status, output)
 
     def ruptime(self):
         '''
@@ -228,7 +238,7 @@ class PBS(list):
         c3n15         up   4+01:07,     0 users,  load 2.00, 2.00, 1.92
         '''
         status,getrup = self.getstatusoutput('ruptime')
-        print status,getrup
+        print status, getrup
         if getrup.strip() == 'ruptime: no hosts in /var/spool/rwho':
             print getrup
             return
@@ -240,18 +250,18 @@ class PBS(list):
 
             fields = line.split(',')
             if len(fields) == 5:
-                name,status,uptime = fields[0].split()
+                name, status, uptime = fields[0].split()
                 node['name'] = name
                 node['status'] = status
                 node['uptime'] = uptime
 
-                nusers,users = fields[1].split()
+                nusers, users = fields[1].split()
                 node['nusers'] = nusers
-                load,oneload = fields[2].split()
+                load, oneload = fields[2].split()
                 oneload = float(oneload)
                 fiveload = float(fields[3])
                 fifteenload = float(fields[4])
-                node['load'] = (oneload,fiveload,fifteenload)
+                node['load'] = (oneload, fiveload, fifteenload)
 
             elif len(fields) == 1:
                 name,status,uptime = fields[0].split()
@@ -266,7 +276,7 @@ class PBS(list):
 
         return nodes
 
-    def pbsnodes(self,arg=None,*nodelist):
+    def pbsnodes(self, arg=None, *nodelist):
         ''' offers some of pbsnodes functionalities
 
         arg is a character string:
@@ -297,12 +307,12 @@ class PBS(list):
         ''' parse the output of pbsnodes -a'''
         Nodelist = []
 
-        status,output = self.getstatusoutput('pbsnodes -a')
+        status, output = self.getstatusoutput('pbsnodes -a')
         output = output.split('\n')
 
         hostre = re.compile('^\c')
         for line in output:
-            #only host lines start with a character
+            # only host lines start with a character
             if  hostre.match(line):
                 node = {}
                 continue
@@ -312,7 +322,7 @@ class PBS(list):
 
             line.strip()
             if line is not '':
-                tag,value = line.split('=')
+                tag, value = line.split('=')
                 node[tag.strip()] = value.strip()
 
         return Nodelist
@@ -324,7 +334,7 @@ class PBS(list):
         '''
         del self[:]
 
-        status,output = self.getstatusoutput('qstat -f')
+        status, output = self.getstatusoutput('qstat -f')
 
         output = output.split('\n')
         if output == ['']:
@@ -351,32 +361,32 @@ class PBS(list):
                 # we have matched that the line starts a tag = value
                 # split the line with ' = ' to distinguish it from '='
                 # which also occurs frequently in the values
-                tag,value = line.split(' = ')
-                tag=tag.strip()
-                value=value.strip()
+                tag, value = line.split(' = ')
+                tag = tag.strip()
+                value = value.strip()
                 job[tag] = value
 
             elif linecont.search(line):
-                #a couple of tags have multiline values
+                # a couple of tags have multiline values
                 # they don't match the regexp above, so i
                 # just add these lines to the tag
                 job[tag] += line.strip()
 
             else:
-                print 'no match',line
+                print 'no match', line
 
     def threadpoll(self):
 
         ''' Threading example'''
         # this could be faster but I can't qet it to complete
 
-        status,output = self.getstatusoutput('qselect')
+        status, output = self.getstatusoutput('qselect')
 
         output = output.split('\n')
 
         joblist = []
         for jobid in output:
-            j = job(jobid,self.host)
+            j = job(jobid, self.host)
             joblist.append(j)
             j.start()
 
@@ -388,7 +398,6 @@ class PBS(list):
             j.join()
             self.append(j.job)
 
-
     def fastpoll(self):
         '''refresh the list of jobs'''
 
@@ -397,7 +406,7 @@ class PBS(list):
             raise Exception, 'qstat does not work on this host'
 
         output = output.split('\n')
-        #remove all entries currently stored
+        # remove all entries currently stored
         del self[:]
         # now parse output
         for line in output[3:]:
@@ -416,25 +425,25 @@ class PBS(list):
 
                 self.append(job)
 
-    def qdel(self,*jobids):
+    def qdel(self, *jobids):
         '''
         kill a job by its jobid
         '''
 
-        status,output = self.getstatusoutput('qdel %s' % string.join(jobids,' '))
+        status, output = self.getstatusoutput('qdel %s' % string.join(jobids,' '))
 
         return (status,output)
 
-    def qdelp(self,*jobids):
+    def qdelp(self, *jobids):
         '''
         kill a job by its jobid
         '''
 
-        status,output = self.getstatusoutput('qdel -p %s' % string.join(jobids,' '))
+        status, output = self.getstatusoutput('qdel -p %s' % string.join(jobids, ' '))
 
-        return (status,output)
+        return (status, output)
 
-    def qhold(self,hold_list,*jobids):
+    def qhold(self, hold_list, *jobids):
         '''
         The  qhold  command requests that a server place one or more holds on a
         job.  A job that has a hold is not eligible for  execution.
@@ -458,14 +467,14 @@ class PBS(list):
         '''
 
         for jobid in jobids:
-            status,output = self.getstatusoutput('qhold -h "%s" %s' % (hold_list,
-                                                                       jobid))
+            status, output = self.getstatusoutput('qhold -h "%s" %s' % (hold_list,
+                                                                        jobid))
 
             if status is not 0:
                 print output
 
 
-    def qrls(self,hold_list='uos',*jobids):
+    def qrls(self, hold_list='uos', *jobids):
         '''
         The qrls command removes or releases holds which exist on batch jobs.
 
@@ -487,14 +496,14 @@ class PBS(list):
         '''
 
         for jobid in jobids:
-            status,output = self.getstatusoutput('qrls -h "%s" %s' % (hold_list,
-                                                                      jobid))
+            status, output = self.getstatusoutput('qrls -h "%s" %s' % (hold_list,
+                                                                       jobid))
 
             if status is not 0:
                 print output
 
 
-    def qsig(self,signal='suspend',*jobids):
+    def qsig(self, signal='suspend', *jobids):
         '''
         The  signal  argument  is  either  a  signal  name, e.g.
         SIGKILL, the signal name without the  SIG  prefix,  e.g.
@@ -513,10 +522,10 @@ class PBS(list):
         '''
 
 
-        status,output = self.getstatusoutput('qsig -s %s %s' % (signal,string.join(jobids,' ')))
-        return (status,output)
+        status, output = self.getstatusoutput('qsig -s %s %s' % (signal,string.join(jobids,' ')))
+        return (status, output)
 
-    def qalter(self,attributes,*jobids):
+    def qalter(self, attributes, *jobids):
         '''
         see qalter
 
@@ -537,13 +546,11 @@ class PBS(list):
 
         pbs.alter('-l cput=100:00:00,mem=670mb', '145456.beowulf')
         '''
+        status, output = self.getstatusoutput('qalter %s %s' % (attributes,
+                                                                string.join(jobids, ' ')))
+        return (status, output)
 
-
-        status,output = self.getstatusoutput('qalter %s %s' % (attributes,
-                                                               string.join(jobids,' ')))
-        return (status,output)
-
-    def findjobs(self,**kwargs):
+    def findjobs(self, **kwargs):
         '''
         pbs.findjobs(user='jkitchin')
 
@@ -552,16 +559,16 @@ class PBS(list):
         '''
 
         foundjobs = []
-        #now look through all the jobs
+        # now look through all the jobs
         for job in self:
-            #for each job, make sure all the keys match
+            # for each job, make sure all the keys match
             # assume it matches
             match = True
             for key in kwargs.keys():
-                if job.get(key,None) != kwargs[key]:
+                if job.get(key, None) != kwargs[key]:
                     match = False
-            #now if you get here and match = true, then it is a job you
-            #are looking for.
+            # now if you get here and match = true, then it is a job you
+            # are looking for.
             if match:
                 foundjobs.append(job)
 
@@ -590,27 +597,10 @@ class PBS(list):
         'resources_available.arch': 'linux'}
 
         '''
-        Nodelist = []
-
-        status,output = self.getstatusoutput('pbsnodes')
+        status, output = self.getstatusoutput('pbsnodes -x')
         if status is 0:
-            print output
-##        for node in NODES:
-
-##            status,output = self.getstatusoutput('pbsnodes %s' % node)
-##            if status is 0:
-##                output = output.split('\n')
-##                host = output[0].strip()
-##                node = {}
-##                for line in output[1:]:
-##                    line.strip()
-##                    if line is not '':
-##                        tag,value = line.split('=')
-##                        node[tag.strip()]=value.strip()
-
-##                Nodelist.append(node)
-
-##        return Nodelist
+            import xmltodict
+            return xmltodict.parse(output)['Data']['Node']
 
     def qsub(self,
              jobfiles,
@@ -652,21 +642,21 @@ class PBS(list):
         remotedirfile = jobfile + '.remotedir'
 
         if remotedir is None and os.path.exists(remotedirfile):
-            remotedir = open(remotedirfile,'r').readline().strip()
+            remotedir = open(remotedirfile, 'r').readline().strip()
         elif remotedir is None:
             import tempfile
-            i,tmpdirname = tempfile.mkstemp(dir='.')
-            path,tmpdirname = os.path.split(tmpdirname)
+            i, tmpdirname = tempfile.mkstemp(dir='.')
+            path, tmpdirname = os.path.split(tmpdirname)
 
             remotedir = 'tmp/%s' % tmpdirname
 
-            #mkstemp actually makes the file, so we delete it
+            # mkstemp actually makes the file, so we delete it
             os.close(i)
             os.unlink(tmpdirname)
         else:
-            remotedir = remotedir #arg passed into function
+            remotedir = remotedir  # arg passed into function
 
-        f = open(remotedirfile,'w')
+        f = open(remotedirfile, 'w')
         f.write(remotedir)
         f.close()
 
@@ -674,10 +664,10 @@ class PBS(list):
         pullbackfile = jobfile + '.pullback'
         qsubfile = jobfile + '.qsubcmd'
 
-        #see if job has been submitted before
+        # see if job has been submitted before
         jobid_file = jobfile + '.jobid'
         if os.path.exists(jobid_file):
-            f = open(jobid_file,'r')
+            f = open(jobid_file, 'r')
             jobid = f.readline().strip()
             f.close()
 
@@ -709,23 +699,23 @@ class PBS(list):
 
             # if you get here, it was not in the queue anymore
             # now we need to copy the results back
-            src = '%s:%s/' % (server,remotedir)
+            src = '%s:%s/' % (server, remotedir)
 
             if self.verbosity > 1:
-                print 'copying back remote results: ',src
+                print 'copying back remote results: ', src
 
-            status,output = rsync(src,'.')
+            status,output = rsync(src, '.')
 
-            #we have made it this far, we should now remove the remote
-            #directory.
+            # we have made it this far, we should now remove the remote
+            # directory.
             if self.verbosity > 1:
-                print 'removing remote directory: ',remotedir
+                print 'removing remote directory: ', remotedir
             cmd = 'rm -fr  %s' % (remotedir)
-            status, output = ssh(cmd,server)
+            status, output = ssh(cmd, server)
             if self.verbosity > 1:
-                print 'removing remote directory status: ',status
+                print 'removing remote directory status: ', status
 
-            #now remove some files we don't need anymore
+            # now remove some files we don't need anymore
             os.unlink(jobid_file)
 
             nodefile = 'pbs.%s.nodes' % jobid
@@ -749,10 +739,10 @@ class PBS(list):
             jobnumber, host = jobid.split('.')
             joboutputfile = jobfile[0:15] + '.o%s' % jobnumber
 
-            #this may not exist if user killed job before it started
-            #I also assume here that output and error have been joined
+            # this may not exist if user killed job before it started
+            # I also assume here that output and error have been joined
             if os.path.exists(joboutputfile):
-                f = open(joboutputfile,'r')
+                f = open(joboutputfile, 'r')
 
                 #now lets hunt for errors in the output file
                 for line in f:
@@ -784,110 +774,68 @@ class PBS(list):
 
             return True
 
-        if os.environ.get('PBS_DRYRUN',None) is not None:
+        if os.environ.get('PBS_DRYRUN', None) is not None:
             print 'Dry run detected. exiting'
             return
 
         # this job needs to be submitted if you get here
         if self.verbosity > 1:
             print 'Submitting job:'
-        destination = '%s:%s' % (server,remotedir)
+        destination = '%s:%s' % (server, remotedir)
 
         #make sure destination directory exists
-        status,output = ssh('mkdir -p %s' % remotedir,server)
+        status,output = ssh('mkdir -p %s' % remotedir, server)
 
         #1 copy files to remote system
-        status,output = rsync(jobfiles,destination)
+        status,output = rsync(jobfiles, destination)
 
         #2 submit job
         cmds = ['cd %s' % remotedir,
                 '%s %s' % (QSUB, jobfile)]
 
-        cmd = string.join(cmds,'; ')
+        cmd = string.join(cmds, '; ')
 
-        status,output = ssh(cmd,server)
+        status, output = ssh(cmd, server)
         if status is not 0:
             print '==================================='
             print output
             print '==================================='
             raise PBS_UnknownError
 
-        #we should save the jobid
-        f = open(jobid_file,'w')
+        # we should save the jobid
+        f = open(jobid_file, 'w')
         f.write(output)
         f.close()
 
-        #copy jobid file to remotedir so we can tell on that end
-        #what this temp dir is for.
-        rsync(jobid_file,destination)
+        # copy jobid file to remotedir so we can tell on that end
+        # what this temp dir is for.
+        rsync(jobid_file, destination)
 
-        #get user and hostname to copy results back to
+        # get user and hostname to copy results back to
         import platform
         uname = platform.uname()
         hostname = uname[1]
-        status,user = commands.getstatusoutput('whoami')
+        status, user = commands.getstatusoutput('whoami')
 
-        f = open(qsubfile,'w')
+        f = open(qsubfile, 'w')
         f.write('%s %s\n' % (QSUB, jobfile))
         f.close()
 
 
-        f = open(pullbackfile,'w')
+        f = open(pullbackfile, 'w')
         f.write('#!/bin/tcsh -x\n')
-        f.write('rsync -avz %s:%s/ .\n' % (self.host,remotedir))
+        f.write('rsync -avz %s:%s/ .\n' % (self.host, remotedir))
         f.write('ssh %s@%s rm -fr %s\n' % (user, self.host, remotedir))
         f.write('#end')
         f.close()
-        os.chmod(pullbackfile,0755)
+        os.chmod(pullbackfile, 0755)
 
 
-        f = open(pushbackfile,'w')
+        f = open(pushbackfile, 'w')
         f.write('#!/bin/tcsh -x\n')
-        f.write('rsync -avz . %s@%s:%s\n' % (user,hostname,os.getcwd()))
+        f.write('rsync -avz . %s@%s:%s\n' % (user, hostname, os.getcwd()))
         f.close()
-        os.chmod(pushbackfile,0755)
-        rsync(pushbackfile,destination)
+        os.chmod(pushbackfile, 0755)
+        rsync(pushbackfile, destination)
 
-        raise JobSubmitted,output
-
-
-
-
-if __name__ == '__main__':
-
-
-    pbs = PBS()
-    #pbs.fastpoll()
-    #print pbs.ruptime()
-    print pbs.pbsnodes()
-
-#    pbs.qsig('suspend','149131', '149402')
-
-#    pbs.fastpoll()
-
-#    s,p = pbs.pbsnodes('-a')
-#    print p
-
-    nodes = pbs.findnodes()
-    print nodes
-
-#    jobs = pbs.findjobs(job_state='H')
-
-#    jobs = pbs.findjobs(euser='jkitchin')
- #   for job in jobs:
-  #      print job['Job Id']
-
-
-
-    #for job in pbs:
-    #    if 'c1n' in job.get('exec_host',''):
-    #        print job['Job Id'], job['exec_host']
-
-
-
-
-
-##     print pbs.kill(jobid)
-
-##     for job in pbs.FindJobs(user='jkitchin'):
-##         print job
+        raise JobSubmitted, output

@@ -73,6 +73,257 @@ print pbs.findjobs(euser='jkitchin')
 #+RESULTS:
 : [{'euser': 'jkitchin', 'job_state': 'Q', 'queue': 'short', 'resources_used.cput': '0', 'Job Id': '546726.gilgamesh', 'Job_Name': 'rutile1.py'}, {'euser': 'jkitchin', 'job_state': 'Q', 'queue': 'short', 'resources_used.cput': '0', 'Job Id': '546727.gilgamesh', 'Job_Name': 'rutile-vasp.py'}]
 
-#+BEGIN_SRC python :results output
+* Print memory usage and requested on jobs
+#+BEGIN_SRC python :results output drawer org
+from torque import PBS
+pbs = PBS()
+pbs.poll()
+#print pbs[0]
 
+print '| jobid | user | requested mem | used mem | used vmem |\n|-'
+for job in pbs:
+    if job['job_state'] == 'R':
+        mem = int(job.get('resources_used.mem')[0:-2]) / 1024 / 1024
+        vmem = int(job['resources_used.vmem'][0:-2]) / 1024 / 1024
+        req = job['Resource_List.mem']
+        euser = job['euser']
+        print "|{job[Job Id]} | {euser} | {req} | {mem} gb | {vmem} gb | ".format(job=job,
+                                                                                  euser=euser,
+                                                                                  mem=mem,
+                                                                                  vmem=vmem,
+                                                                                  req=req)
 #+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC org
+| jobid                           | user     | requested mem | used mem | used vmem |
+|---------------------------------+----------+---------------+----------+-----------|
+| 1428627.gilgamesh.cheme.cmu.edu | fgeng    | 1999mb        | 0 gb     | 0 gb      |
+| 1428668.gilgamesh.cheme.cmu.edu | fgeng    | 1999mb        | 1 gb     | 1 gb      |
+| 1428684.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 10 gb    | 11 gb     |
+| 1428685.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 10 gb    | 11 gb     |
+| 1428686.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 10 gb    | 11 gb     |
+| 1428687.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 11 gb    | 11 gb     |
+| 1428688.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 11 gb    | 11 gb     |
+| 1428689.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 11 gb    | 11 gb     |
+| 1428699.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 10 gb    | 11 gb     |
+| 1428701.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 11 gb    | 11 gb     |
+| 1428703.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 11 gb    | 11 gb     |
+| 1428705.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 11 gb    | 11 gb     |
+| 1428721.gilgamesh.cheme.cmu.edu | fgeng    | 1999mb        | 0 gb     | 0 gb      |
+| 1428756.gilgamesh.cheme.cmu.edu | devonw   | 2gb           | 0 gb     | 0 gb      |
+| 1428757.gilgamesh.cheme.cmu.edu | devonw   | 2gb           | 0 gb     | 0 gb      |
+| 1428758.gilgamesh.cheme.cmu.edu | devonw   | 2gb           | 0 gb     | 0 gb      |
+| 1428831.gilgamesh.cheme.cmu.edu | khetana  | 64gb          | 0 gb     | 0 gb      |
+| 1428989.gilgamesh.cheme.cmu.edu | fgeng    | 1999mb        | 0 gb     | 0 gb      |
+| 1429124.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1429126.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1429127.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1429128.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1429129.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1429130.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 11 gb    | 11 gb     |
+| 1429131.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 11 gb    | 11 gb     |
+| 1429157.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1429160.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 11 gb    | 11 gb     |
+| 1429168.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 11 gb    | 11 gb     |
+| 1429184.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1429185.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1429188.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1429189.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1429191.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 11 gb    | 11 gb     |
+| 1429192.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 11 gb    | 11 gb     |
+| 1429194.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 11 gb    | 11 gb     |
+| 1429195.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 11 gb    | 11 gb     |
+| 1429202.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1429208.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1429209.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1429210.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1430146.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1430147.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 6 gb     | 6 gb      |
+| 1430149.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 11 gb    | 11 gb     |
+| 1430150.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 6 gb     | 6 gb      |
+| 1430152.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 11 gb    | 11 gb     |
+| 1430153.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 6 gb     | 6 gb      |
+| 1430155.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 11 gb    | 11 gb     |
+| 1430156.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 6 gb     | 6 gb      |
+| 1430170.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1430171.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1430172.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 6 gb     | 6 gb      |
+| 1430173.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1430174.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 6 gb     | 6 gb      |
+| 1430175.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1430176.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 11 gb    | 11 gb     |
+| 1430177.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 11 gb    | 11 gb     |
+| 1430178.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 6 gb     | 6 gb      |
+| 1430195.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1430196.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 6 gb     | 6 gb      |
+| 1430198.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 11 gb    | 11 gb     |
+| 1430201.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 11 gb    | 11 gb     |
+| 1430202.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 6 gb     | 6 gb      |
+| 1430204.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 11 gb    | 11 gb     |
+| 1430205.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 6 gb     | 6 gb      |
+| 1430207.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 4 gb     | 4 gb      |
+| 1430210.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 4 gb     | 4 gb      |
+| 1430213.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 4 gb     | 4 gb      |
+| 1430216.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 4 gb     | 4 gb      |
+| 1430219.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1430220.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1430221.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 6 gb     | 6 gb      |
+| 1430222.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 11 gb    | 11 gb     |
+| 1430223.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 11 gb    | 11 gb     |
+| 1430224.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 6 gb     | 6 gb      |
+| 1430225.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1430226.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 10 gb    | 11 gb     |
+| 1430227.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 6 gb     | 6 gb      |
+| 1430228.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 11 gb    | 11 gb     |
+| 1430229.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 11 gb    | 11 gb     |
+| 1430230.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 6 gb     | 6 gb      |
+| 1430456.gilgamesh.cheme.cmu.edu | chenw3   | 2gb           | 1 gb     | 2 gb      |
+| 1430459.gilgamesh.cheme.cmu.edu | chenw3   | 2gb           | 1 gb     | 2 gb      |
+| 1430465.gilgamesh.cheme.cmu.edu | fgeng    | 12gb          | 11 gb    | 11 gb     |
+| 1430777.gilgamesh.cheme.cmu.edu | sushant1 | 1999mb        | 0 gb     | 1 gb      |
+| 1430778.gilgamesh.cheme.cmu.edu | sushant1 | 1999mb        | 0 gb     | 1 gb      |
+| 1430891.gilgamesh.cheme.cmu.edu | simonlu  | 8gb           | 0 gb     | 6 gb      |
+| 1430893.gilgamesh.cheme.cmu.edu | simonlu  | 8gb           | 0 gb     | 7 gb      |
+| 1431388.gilgamesh.cheme.cmu.edu | atharval | 8gb           | 1 gb     | 1 gb      |
+| 1431390.gilgamesh.cheme.cmu.edu | atharval | 8gb           | 1 gb     | 1 gb      |
+| 1431499.gilgamesh.cheme.cmu.edu | atharval | 8gb           | 1 gb     | 1 gb      |
+| 1431502.gilgamesh.cheme.cmu.edu | atharval | 8gb           | 1 gb     | 1 gb      |
+| 1431503.gilgamesh.cheme.cmu.edu | atharval | 8gb           | 1 gb     | 1 gb      |
+| 1432079.gilgamesh.cheme.cmu.edu | fgeng    | 1999mb        | 0 gb     | 0 gb      |
+| 1432080.gilgamesh.cheme.cmu.edu | fgeng    | 1999mb        | 0 gb     | 0 gb      |
+| 1432093.gilgamesh.cheme.cmu.edu | khetana  | 64gb          | 0 gb     | 0 gb      |
+| 1432095.gilgamesh.cheme.cmu.edu | khetana  | 64gb          | 0 gb     | 0 gb      |
+| 1432096.gilgamesh.cheme.cmu.edu | khetana  | 64gb          | 0 gb     | 0 gb      |
+| 1432097.gilgamesh.cheme.cmu.edu | khetana  | 64gb          | 0 gb     | 0 gb      |
+| 1432098.gilgamesh.cheme.cmu.edu | tianyug1 | 2gb           | 1 gb     | 1 gb      |
+| 1432099.gilgamesh.cheme.cmu.edu | tianyug1 | 2gb           | 1 gb     | 1 gb      |
+| 1432100.gilgamesh.cheme.cmu.edu | tianyug1 | 2gb           | 1 gb     | 1 gb      |
+| 1432101.gilgamesh.cheme.cmu.edu | tianyug1 | 2gb           | 1 gb     | 1 gb      |
+| 1432109.gilgamesh.cheme.cmu.edu | fgeng    | 1999mb        | 0 gb     | 0 gb      |
+| 1432110.gilgamesh.cheme.cmu.edu | fgeng    | 1999mb        | 0 gb     | 0 gb      |
+| 1432126.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 13 gb    | 13 gb     |
+| 1432127.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 13 gb    | 13 gb     |
+| 1432128.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 13 gb    | 13 gb     |
+| 1432129.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 13 gb    | 13 gb     |
+| 1432130.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 13 gb    | 14 gb     |
+| 1432131.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 13 gb    | 14 gb     |
+| 1432132.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 12 gb    | 13 gb     |
+| 1432133.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 13 gb    | 13 gb     |
+| 1432134.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 13 gb    | 13 gb     |
+| 1432135.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 14 gb    | 14 gb     |
+| 1432137.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 14 gb    | 14 gb     |
+| 1432138.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 14 gb    | 14 gb     |
+| 1432139.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 14 gb    | 14 gb     |
+| 1432140.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 14 gb    | 14 gb     |
+| 1432141.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 14 gb    | 14 gb     |
+| 1432142.gilgamesh.cheme.cmu.edu | fgeng    | 15gb          | 14 gb    | 14 gb     |
+| 1432183.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 18 gb    | 18 gb     |
+| 1432184.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 18 gb    | 18 gb     |
+| 1432185.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 18 gb    | 18 gb     |
+| 1432186.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 18 gb    | 18 gb     |
+| 1432187.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 18 gb    | 18 gb     |
+| 1432188.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 18 gb    | 18 gb     |
+| 1432189.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 18 gb    | 18 gb     |
+| 1432190.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 18 gb    | 18 gb     |
+| 1432191.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 18 gb    | 18 gb     |
+| 1432192.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 18 gb    | 18 gb     |
+| 1432193.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 18 gb    | 18 gb     |
+| 1432194.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 18 gb    | 18 gb     |
+| 1432195.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 18 gb    | 18 gb     |
+| 1432196.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 18 gb    | 18 gb     |
+| 1432197.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 18 gb    | 18 gb     |
+| 1432198.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 16 gb    | 17 gb     |
+| 1432199.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 16 gb    | 17 gb     |
+| 1432200.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 16 gb    | 17 gb     |
+| 1432201.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 16 gb    | 17 gb     |
+| 1432202.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 16 gb    | 17 gb     |
+| 1432203.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 17 gb    | 17 gb     |
+| 1432204.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 17 gb    | 17 gb     |
+| 1432205.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 17 gb    | 17 gb     |
+| 1432206.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 17 gb    | 17 gb     |
+| 1432207.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 17 gb    | 17 gb     |
+| 1432208.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 17 gb    | 17 gb     |
+| 1432209.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 17 gb    | 17 gb     |
+| 1432210.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 17 gb    | 17 gb     |
+| 1432211.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 17 gb    | 17 gb     |
+| 1432212.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 17 gb    | 17 gb     |
+| 1432213.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 17 gb    | 17 gb     |
+| 1432214.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 17 gb    | 17 gb     |
+| 1432215.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 17 gb    | 17 gb     |
+| 1432216.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 17 gb    | 17 gb     |
+| 1432217.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 17 gb    | 17 gb     |
+| 1432218.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 17 gb    | 17 gb     |
+| 1432219.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 17 gb    | 17 gb     |
+| 1432220.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 17 gb    | 17 gb     |
+| 1432221.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 17 gb    | 17 gb     |
+| 1432222.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 17 gb    | 17 gb     |
+| 1432223.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 17 gb    | 17 gb     |
+| 1432224.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 17 gb    | 17 gb     |
+| 1432225.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 15 gb    | 15 gb     |
+| 1432226.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 12 gb    | 13 gb     |
+| 1432227.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 13 gb    | 13 gb     |
+| 1432228.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 13 gb    | 13 gb     |
+| 1432229.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 14 gb    | 14 gb     |
+| 1432230.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 14 gb    | 15 gb     |
+| 1432231.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 15 gb    | 15 gb     |
+| 1432232.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 13 gb    | 13 gb     |
+| 1432233.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 13 gb    | 13 gb     |
+| 1432234.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 13 gb    | 13 gb     |
+| 1432235.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 13 gb    | 13 gb     |
+| 1432236.gilgamesh.cheme.cmu.edu | fgeng    | 20gb          | 13 gb    | 14 gb     |
+| 1432470.gilgamesh.cheme.cmu.edu | jboes    | 4gb           | 0 gb     | 0 gb      |
+| 1432471.gilgamesh.cheme.cmu.edu | jboes    | 6gb           | 0 gb     | 0 gb      |
+| 1432472.gilgamesh.cheme.cmu.edu | jboes    | 6gb           | 0 gb     | 0 gb      |
+| 1432473.gilgamesh.cheme.cmu.edu | jboes    | 6gb           | 0 gb     | 0 gb      |
+| 1432474.gilgamesh.cheme.cmu.edu | jboes    | 6gb           | 0 gb     | 0 gb      |
+| 1432475.gilgamesh.cheme.cmu.edu | jboes    | 6gb           | 0 gb     | 0 gb      |
+| 1432476.gilgamesh.cheme.cmu.edu | jboes    | 4gb           | 0 gb     | 0 gb      |
+| 1432477.gilgamesh.cheme.cmu.edu | jboes    | 6gb           | 0 gb     | 0 gb      |
+| 1432478.gilgamesh.cheme.cmu.edu | jboes    | 6gb           | 0 gb     | 0 gb      |
+| 1432479.gilgamesh.cheme.cmu.edu | jboes    | 6gb           | 0 gb     | 0 gb      |
+| 1432481.gilgamesh.cheme.cmu.edu | jboes    | 6gb           | 0 gb     | 0 gb      |
+| 1432482.gilgamesh.cheme.cmu.edu | jboes    | 6gb           | 0 gb     | 0 gb      |
+| 1432483.gilgamesh.cheme.cmu.edu | jboes    | 4gb           | 0 gb     | 0 gb      |
+| 1432484.gilgamesh.cheme.cmu.edu | jboes    | 6gb           | 0 gb     | 0 gb      |
+| 1432485.gilgamesh.cheme.cmu.edu | jboes    | 6gb           | 0 gb     | 0 gb      |
+| 1432486.gilgamesh.cheme.cmu.edu | jboes    | 6gb           | 0 gb     | 0 gb      |
+| 1432487.gilgamesh.cheme.cmu.edu | jboes    | 6gb           | 0 gb     | 0 gb      |
+| 1432488.gilgamesh.cheme.cmu.edu | jboes    | 6gb           | 0 gb     | 0 gb      |
+| 1432490.gilgamesh.cheme.cmu.edu | jboes    | 8gb           | 0 gb     | 0 gb      |
+| 1432500.gilgamesh.cheme.cmu.edu | azeeshan | 30gb          | 0 gb     | 0 gb      |
+| 1432543.gilgamesh.cheme.cmu.edu | kparrish | 6gb           | 0 gb     | 0 gb      |
+| 1432544.gilgamesh.cheme.cmu.edu | kparrish | 6gb           | 0 gb     | 0 gb      |
+| 1432545.gilgamesh.cheme.cmu.edu | kparrish | 6gb           | 0 gb     | 0 gb      |
+| 1432546.gilgamesh.cheme.cmu.edu | kparrish | 6gb           | 0 gb     | 0 gb      |
+| 1432548.gilgamesh.cheme.cmu.edu | kparrish | 6gb           | 0 gb     | 0 gb      |
+| 1432549.gilgamesh.cheme.cmu.edu | kparrish | 6gb           | 0 gb     | 0 gb      |
+| 1432550.gilgamesh.cheme.cmu.edu | kparrish | 6gb           | 0 gb     | 0 gb      |
+| 1432552.gilgamesh.cheme.cmu.edu | kparrish | 6gb           | 0 gb     | 0 gb      |
+| 1432553.gilgamesh.cheme.cmu.edu | kparrish | 6gb           | 0 gb     | 0 gb      |
+| 1432554.gilgamesh.cheme.cmu.edu | kparrish | 6gb           | 0 gb     | 0 gb      |
+| 1432556.gilgamesh.cheme.cmu.edu | kparrish | 6gb           | 0 gb     | 0 gb      |
+| 1432557.gilgamesh.cheme.cmu.edu | kparrish | 6gb           | 0 gb     | 0 gb      |
+| 1432562.gilgamesh.cheme.cmu.edu | kparrish | 6gb           | 0 gb     | 0 gb      |
+| 1432595.gilgamesh.cheme.cmu.edu | tengm    | 2gb           | 0 gb     | 1 gb      |
+| 1432596.gilgamesh.cheme.cmu.edu | tengm    | 2gb           | 0 gb     | 1 gb      |
+| 1432597.gilgamesh.cheme.cmu.edu | tengm    | 2gb           | 0 gb     | 1 gb      |
+| 1432598.gilgamesh.cheme.cmu.edu | tengm    | 2gb           | 1 gb     | 1 gb      |
+| 1432599.gilgamesh.cheme.cmu.edu | tengm    | 2gb           | 1 gb     | 1 gb      |
+| 1432600.gilgamesh.cheme.cmu.edu | tengm    | 2gb           | 1 gb     | 2 gb      |
+| 1432601.gilgamesh.cheme.cmu.edu | tengm    | 2gb           | 1 gb     | 2 gb      |
+#+END_SRC
+
+* nodelist
+
+#+BEGIN_SRC python
+from torque import PBS
+pbs = PBS()
+pbs.poll()
+
+import xmltodict
+print pbs.findnodes()[10]
+#+END_SRC
+
+#+RESULTS:
+: OrderedDict([(u'name', u'n10'), (u'state', u'free'), (u'np', u'32'), (u'properties', u'original'), (u'ntype', u'cluster'), (u'jobs', u'0/1430224.gilgamesh.cheme.cmu.edu, 1/1432185.gilgamesh.cheme.cmu.edu, 2/1432128.gilgamesh.cheme.cmu.edu'), (u'status', u'opsys=linux,uname=Linux n10 2.6.18-164.15.1.el5.541g0000 #1 SMP Wed Mar 17 21:11:25 EDT 2010 x86_64,sessions=13934 32888 59260,nsessions=3,nusers=1,idletime=809936,totmem=73184908kb,availmem=32495584kb,physmem=65361296kb,ncpus=32,loadave=3.00,netload=17478994926,state=free,jobs=1430224.gilgamesh.cheme.cmu.edu 1432185.gilgamesh.cheme.cmu.edu 1432128.gilgamesh.cheme.cmu.edu,varattr=,rectime=1469751656')])
